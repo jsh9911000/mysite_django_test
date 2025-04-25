@@ -1,0 +1,17 @@
+{% if latest_question_list %}
+    <ul>
+    {% for question in latest_question_list %}
+        <!--
+            방법 (1)
+            <li><a href="/polls/{{ question_id }}/">{{question.question_text}}</a></li>
+        -->
+        <!--
+            방법(2)
+            주의: polls:detail로 해야된다. 왜? 상세페이지로 이동하는거잖아.
+        -->
+            <li><a href="{% url 'polls:detail' question.id %}">{{ question.question_text }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No polls are available.</p>
+{% endif %}
