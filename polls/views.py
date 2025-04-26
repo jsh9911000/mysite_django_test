@@ -1,7 +1,8 @@
-from django.shortcuts import render
-from django.http import Http404, HttpResponse
+from django.shortcuts import get_object_or_404, render
+from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.urls import reverse
 
-from polls.models import Question
+from polls.models import Choice, Question
 
 # Create your views here. => 클라이언트의 요청(request)에 대해서 응답(response)해주는 함수 또는 클래스를 정의. 
 def index(request):
@@ -21,5 +22,14 @@ def detail(request, question_id):
 def results(request, question_id):
     return HttpResponse(response % question_id)
 
-def vote(request, question_id):
-    return HttpResponse("You're voting on question %s."%question_id)
+def vote(request, question_id):     # request 요청뿐만 아니라 question_id까지 파라미터로 받는데, question_id는 urls.py에서 보내준다.
+    question = get_object_or_404(Question, pk=question_id)
+
+    try:
+        selected_choice = question.choice_set.get(pk=request.POST["choice"])  # request 요청에서 POST 요청한 값 중 name이 choice인 값을 가져온다.
+    except (KeyError, Choice.DoesNotExist):
+        return render(request, "polls/detail.html", {"question":question, "error_message":"You didn't select a choice.",})
+    else:
+        selected_choice.votes += 1
+        selected_choice.save()
+        return HttpResponseRedirect(reverse("polls:result", args=(question_id, id)))
